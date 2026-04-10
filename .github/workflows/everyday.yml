@@ -26,8 +26,9 @@ jobs:
           sudo apt install -y tree
           pip install playwright
           playwright install
-          pwd | tee /dev/tty
-          tree -a | tee /dev/tty
+          pwd
+          ls
+
 
       # 3️⃣ 拉取网页内容
       - name: Run Playwright script
