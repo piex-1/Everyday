@@ -1,0 +1,66 @@
+name: Check the page content
+
+on:
+  schedule:
+    - cron: '0 12 * * *'   # UTC 12:00 每天执行
+  workflow_dispatch:
+
+jobs:
+  check_page:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ 获取仓库内容
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      # 2️⃣ 安装 Python + Playwright
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          pip install playwright
+          playwright install
+
+      # 3️⃣ 拉取网页内容
+      - name: Run Playwright script
+        run: |
+          python fetch.py  # 你的脚本，会生成 page.txt
+
+      # 4️⃣ 确保目标文件夹存在
+      - name: Ensure /source directory
+        run: |
+          mkdir -p source
+
+      # 5️⃣ 对比文件
+      - name: Compare with old file
+        id: compare
+        run: |
+          if [ -f source/kamept.txt ]; then
+            if cmp -s page.txt source/kamept.txt; then
+              echo "changed=false" >> $GITHUB_OUTPUT
+            else
+              echo "changed=true" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      # 6️⃣ 更新文件（如果有变化）
+      - name: Update saved file
+        if: steps.compare.outputs.changed == 'true'
+        run: |
+          cp page.txt source/kamept.txt
+
+      # 7️⃣ Commit & push（可选）
+      - name: Commit changes
+        if: steps.compare.outputs.changed == 'true'
+        run: |
+          git config --global user.name "bot"
+          git config --global user.email "bot@example.com"
+          git add source/kamept.txt
+          git commit -m "Update kamept.txt due to page change"
+          git push
