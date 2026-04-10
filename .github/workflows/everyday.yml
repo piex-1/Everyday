@@ -22,6 +22,8 @@ jobs:
 
       - name: Install dependencies
         run: |
+          sudo apt update
+          sudo apt install -y tree
           pip install playwright
           playwright install
           pwd
