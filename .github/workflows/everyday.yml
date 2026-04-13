@@ -59,13 +59,13 @@ jobs:
         run: |
           DATE=$(date -u "+%Y-%m-%d %H:%M:%S")
           RESULT="${{ steps.compare.outputs.changed }}"
-          echo "$DATE | changed=$RESULT" >> source/info.log
+          echo "$DATE | changed=$RESULT" >> source/info.txt
 
       # 7️⃣ 提交日志（无论是否变化都提交）
       - name: Commit log
         run: |
           git config --global user.name "shiye"
           git config --global user.email "shiye@zju.edu.cn"
-          git add source/info.log
-          git commit -m "Update info.log"
+          git add source/info.txt
+          git commit -m "Update info.txt"
           git push
