@@ -2,7 +2,7 @@ name: Check the page content
 
 on:
   schedule:
-    - cron: '0 12 * * *'   # UTC 12:00 每天执行
+    - cron: '0 12 * * *'   # UTC 12:00
   workflow_dispatch:
 
 jobs:
@@ -10,11 +10,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ 获取仓库内容
+      # 1️⃣ 拉代码
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      # 2️⃣ 安装 Python + Playwright
+      # 2️⃣ Python + Playwright
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
@@ -22,24 +22,18 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo apt update
-          sudo apt install -y tree
           pip install playwright
           playwright install
-          pwd
-          ls
 
-      # 3️⃣ 拉取网页内容
+      # 3️⃣ 抓网页
       - name: Run Playwright script
-        run: |
-          python fetch.py  # 你的脚本，会生成 page.txt
+        run: python fetch.py
 
-      # 4️⃣ 确保目标文件夹存在
-      - name: Ensure /source directory
-        run: |
-          mkdir -p source
+      # 4️⃣ 确保目录存在
+      - name: Ensure source dir
+        run: mkdir -p source
 
-      # 5️⃣ 对比文件
+      # 5️⃣ 对比
       - name: Compare with old file
         id: compare
         run: |
@@ -52,20 +46,19 @@ jobs:
           else
             echo "changed=true" >> $GITHUB_OUTPUT
           fi
-          echo "File changed? ${{ steps.compare.outputs.changed }}"
 
-      # 6️⃣ 更新文件（如果有变化）
-      - name: Update saved file
-        if: steps.compare.outputs.changed == 'true'
+      # 6️⃣ 记录日志（核心）
+      - name: Write log
         run: |
-          cp page.txt source/kamept.txt
+          DATE=$(date -u "+%Y-%m-%d %H:%M:%S")
+          RESULT="${{ steps.compare.outputs.changed }}"
+          echo "$DATE | changed=$RESULT" >> source/info.log
 
-      # 7️⃣ Commit & push（可选）
-      - name: Commit changes
-        if: steps.compare.outputs.changed == 'true'
+      # 7️⃣ 提交日志（无论是否变化都提交）
+      - name: Commit log
         run: |
-          git config --global user.name "bot"
-          git config --global user.email "bot@example.com"
-          git add source/kamept.txt
-          git commit -m "Update kamept.txt due to page change"
+          git config --global user.name "shiye"
+          git config --global user.email "shiye@zju.edu.cn"
+          git add source/info.log
+          git commit -m "Update info.log"
           git push
