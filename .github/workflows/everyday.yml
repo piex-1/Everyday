@@ -4,7 +4,8 @@ on:
   schedule:
     - cron: '0 12 * * *'   # UTC 12:00
   workflow_dispatch:
-
+  push:
+  
 permissions:
   contents: write
 
@@ -27,7 +28,7 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y tree
-          pip install playwright
+          pip install playwright          
           playwright install
           pwd
           ls
