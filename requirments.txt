@@ -13,4 +13,3 @@ wechatpy==1.8.18
 xmltodict==0.13.0
 requests
 argparse
-shutil
