@@ -64,6 +64,7 @@ jobs:
           DATE=$(date -u "+%Y-%m-%d %H:%M:%S")
           RESULT="${{ steps.compare.outputs.changed }}"
           echo "$DATE | changed=$RESULT" >> source/info.txt
+          python wechat.py --kamept "$RESULT"
 
       # 7️⃣ 提交日志（无论是否变化都提交）
       - name: Commit log
