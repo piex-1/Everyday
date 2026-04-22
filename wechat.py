@@ -1,6 +1,10 @@
+import argparse
+import filecmp
+import argparse
 import os
-import math
 import random
+import shutil
+
 import requests
 
 from datetime import date, datetime
@@ -31,14 +35,51 @@ def get_random_color():
     return "#%06x" % random.randint(0, 0xFFFFFF)
 
 
-client = WeChatClient(app_id, app_secret)
-wm = WeChatMessage(client)
+def _parse_bool(v: str) -> bool:
+    s = (v or "").strip().lower()
+    if s in {"1", "true", "t", "yes", "y", "on"}:
+        return True
+    if s in {"0", "false", "f", "no", "n", "off", ""}:
+        return False
+    raise ValueError(f"invalid bool value: {v}")
 
-for i in range(len(user_ids)):
-    cit, dat = get_city_date(citys[i])
-    data = {
-        "date": {"value": "今日日期：{}".format(dat), "color": get_random_color()},
-    }
 
-    res = wm.send_template(user_ids[i], template_ids[i], data)
-    print(res)
+def _sync_kamept_snapshot(page_path: str = "page.txt", snapshot_path: str = "source/kamept.txt"):
+    if not os.path.exists(page_path):
+        return
+    os.makedirs(os.path.dirname(snapshot_path) or ".", exist_ok=True)
+    shutil.copyfile(page_path, snapshot_path)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--kamept",
+        default="false",
+        help="bool: true/false/1/0; true 表示文件有变化继续执行，false 表示无变化直接跳过",
+    )
+    args = parser.parse_args()
+
+    kamept = _parse_bool(args.kamept)
+    if not kamept:
+        print("changed=false")
+        return
+
+    print("changed=true")
+
+    client = WeChatClient(app_id, app_secret)
+    wm = WeChatMessage(client)
+
+    for i in range(len(user_ids)):
+        cit, dat = get_city_date(citys[i])
+        data = {
+            "date": {"value": "今日日期：{}".format(dat), "color": get_random_color()},
+        }
+        res = wm.send_template(user_ids[i], template_ids[i], data)
+        print(res)
+
+    _sync_kamept_snapshot("page.txt", "source/kamept.txt")
+
+
+if __name__ == "__main__":
+    main()
