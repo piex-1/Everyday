@@ -30,6 +30,7 @@ jobs:
           sudo apt install -y tree
           pip install playwright          
           playwright install
+          pip install -r requirements.txt
           pwd
           ls
 
