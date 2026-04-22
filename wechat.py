@@ -59,7 +59,6 @@ def main():
     kamept = _parse_bool(args.kamept)
     if not kamept:
         print("changed=false")
-        return
 
     print("changed=true")
 
@@ -67,9 +66,10 @@ def main():
     wm = WeChatMessage(client)
 
     for i in range(len(user_ids)):
-        cit, dat = get_city_date(citys[i])
+        # cit, dat = get_city_date(citys[i])
+        dat = str(kamept)
         data = {
-            "date": {"value": "今日日期：{}".format(dat), "color": get_random_color()},
+            "date": {"value": "今日kamept网址 ：{}".format(dat), "color": get_random_color()},
         }
         res = wm.send_template(user_ids[i], template_ids[i], data)
         print(res)
