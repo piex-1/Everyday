@@ -1,11 +1,7 @@
 import argparse
-import filecmp
-import argparse
 import os
 import random
 import shutil
-
-import requests
 
 from datetime import date, datetime
 from wechatpy import WeChatClient
